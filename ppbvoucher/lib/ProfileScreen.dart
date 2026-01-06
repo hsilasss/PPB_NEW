@@ -116,13 +116,20 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
 
                   const SizedBox(height: 40),
 
-                  Container(
+                  InkWell(
+                     borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }, 
+
+                    child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 40),
                     height: 50,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF4F1E3),
                       borderRadius: BorderRadius.circular(20),
                     ),
+
                     child: const Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -139,6 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
                         ],
                       ),
                     ),
+                  ),
                   ),
 
                   const SizedBox(height: 60),

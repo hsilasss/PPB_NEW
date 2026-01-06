@@ -71,6 +71,9 @@ flutter:
     - assets/images/homee.png
     - assets/images/profile.png
     - assets/images/reward.png
+    - assets/images/logo.png
+    - assets/images/logow.png
+    - assets/images/scope.png
 
   fonts:
     - family: Poppins

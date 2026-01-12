@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -11,6 +14,9 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  String? profileImagePath;
+  final ImagePicker picker = ImagePicker();  
+
   final TextEditingController _name = TextEditingController(text: "Ken");
   final TextEditingController _email = TextEditingController(
     text: "Kenny@gmail.com",
@@ -19,6 +25,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _dob = TextEditingController(
     text: "Tidak bisa diubah",
   );
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfileImage();
+  }
+
+Future<void> loadProfileImage() async {
+  final pref = await SharedPreferences.getInstance();
+    setState(() {
+      profileImagePath = pref.getString("profileImage");
+    });
+}
+  
+
+Future<void> pickImage() async {
+final XFile? image =
+      await picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+        final pref = await SharedPreferences.getInstance();
+         await pref.setString("profileImage", image.path);
+        setState(() {
+          profileImagePath = image.path;
+        }
+      );
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Foto profil disimpan")),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -48,15 +84,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Center(
                     child: Stack(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 40,
                           backgroundColor: Colors.grey,
-                          child: Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.white,
-                          ),
+                          backgroundImage: (profileImagePath != null && File(profileImagePath!).existsSync())
+                            ? FileImage(File(profileImagePath!))
+                            : null,
+                          child: profileImagePath == null
+                            ? Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.white,
+                            )
+                            : null,
                         ),
+                        
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -65,15 +107,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             backgroundColor: Colors.white,
                             child: IconButton(
                               padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.camera_alt, size: 18),
-                              onPressed: () {
-                              if (_formKey.currentState!.validate()){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Perubahan Disimpan!")),
-                                );
-                              }
-                                Navigator.pop(context);
-                              },
+                              icon: Icon(Icons.camera_alt, size: 18),
+                              onPressed: () => pickImage(),
                             ),
                           ),
                         ),
@@ -113,9 +148,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           _input(
                             _phone,
                             validator: (v) {
-                              if (v!.length < 10) return "Nomor tidak valid";
+                              if (v == null || v.isEmpty) {
+                               return "Nomor wajib diisi";
+                              }
+                              if (v.length < 10) {
+                                 return "Nomor tidak valid";
+                              }
                               return null;
                             },
+
                           ),
 
                           _label("Tanggal Lahir"),
@@ -185,6 +226,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
+
 
   Widget _input(
     TextEditingController c, {

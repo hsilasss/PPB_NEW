@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "538777370342",
+    "project_id": "cleanquest-608ff",
+    "storage_bucket": "cleanquest-608ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538777370342:android:4e89f0d84ed77797f00527",
+        "android_client_info": {
+          "package_name": "com.example.ppbvoucher"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsWLn3HAsnEIavaPoe2Y-Ln_A3IawPPQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

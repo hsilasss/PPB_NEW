@@ -98,7 +98,7 @@ class _RewardStorePageState extends State<RewardStorePage> {
       decoration: BoxDecoration(
         color: const Color(0xFF4FC05E),
         borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(colors: [Color(0xFF4FC05E), Color(0xFF2DAA45)]),
+        gradient: const LinearGradient(colors: [Color(0xFF6B8E5F), Color(0xFF6B8E5F)]),
       ),
       padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 18),
       child: Column(
@@ -341,7 +341,7 @@ class _ExchangeMoneyPageState extends State<ExchangeMoneyPage> {
               ),
               ElevatedButton(
                 onPressed: _onTapTukar,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2DAA45), padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6B8E5F), padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                 child: const Text('Tukar'),
               )
             ],
@@ -355,7 +355,7 @@ class _ExchangeMoneyPageState extends State<ExchangeMoneyPage> {
   Widget _buildPointsBox() {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFF4FC05E), borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: const Color(0xFF6B8E5F), borderRadius: BorderRadius.circular(12)),
       child: Row(children: [
         const Icon(Icons.monetization_on, color: Colors.white),
         const SizedBox(width: 8),

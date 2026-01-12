@@ -1,13 +1,14 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
+    id "com.google.gms.google-services"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
     namespace = "com.example.ppbvoucher"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,10 +25,20 @@ android {
         applicationId = "com.example.ppbvoucher"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 23
+        targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        debug {
+            storeFile = file('debug.keystore')
+            keyAlias = 'androiddebugkey'
+            keyPassword = 'android'
+            storePassword = 'android'
+            v2SigningEnabled = false
+        }
     }
 
     buildTypes {
@@ -35,6 +46,27 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+        }
+
+        debug {
+            signingConfig = signingConfigs.debug
+        }
+    }
+
+    // Workaround: exclude some META-INF entries that may not be protected by signature
+    // to avoid install-time signature verification failures on some OEMs.
+    packagingOptions {
+        exclude "META-INF/*.version"
+        exclude "META-INF/*.kotlin_module"
+        exclude "META-INF/com/android/build/gradle/app-metadata.properties"
+    }
+    
+    bundle {
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = false
         }
     }
 }

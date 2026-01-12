@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ppbvoucher/services/firebase_auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,6 +15,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController _confirmPasswordController;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
+  final FirebaseAuthService _authService = FirebaseAuthService();
 
   @override
   void initState() {
@@ -31,6 +34,156 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua field harus diisi')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password tidak cocok')),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password minimal 6 karakter')),
+      );
+      return;
+    }
+
+    // Prevent multiple clicks
+    if (_isLoading) return;
+    
+    setState(() => _isLoading = true);
+    
+    // Show loading dialog dengan cancel button
+    final dialogContext = context;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogCtx) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 20),
+                const Text('Mendaftarkan akun...'),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dialogCtx).pop();
+                    setState(() => _isLoading = false);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text('Batal'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      print('Starting registration for email: $email');
+      
+      final result = await _authService.registerUser(
+        email: email,
+        password: password,
+        name: name,
+      ).timeout(
+        const Duration(seconds: 60),
+        onTimeout: () {
+          print('Registration timeout');
+          throw Exception('Pendaftaran timeout. Periksa koneksi internet.');
+        },
+      );
+
+      print('Registration result: $result');
+
+      if (mounted) {
+        Navigator.of(dialogContext).pop(); // Close loading dialog
+      }
+
+      if (result != null) {
+        print('Registration successful');
+        if (mounted) {
+          ScaffoldMessenger.of(dialogContext).showSnackBar(
+            const SnackBar(
+              content: Text('Registrasi berhasil! Silakan login.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          // Delay sebelum navigate
+          await Future.delayed(const Duration(seconds: 1));
+          if (mounted) {
+            Navigator.pushReplacementNamed(dialogContext, '/login');
+          }
+        }
+      } else {
+        print('Registration failed: result is null');
+        if (mounted) {
+          ScaffoldMessenger.of(dialogContext).showSnackBar(
+            const SnackBar(
+              content: Text('Registrasi gagal. Email mungkin sudah terdaftar.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Registration error: $e');
+      if (mounted) {
+        try {
+          Navigator.of(dialogContext).pop(); // Close loading dialog
+        } catch (e) {
+          print('Error closing dialog: $e');
+        }
+        
+        String errorMsg = 'Error: $e';
+        if (e.toString().contains('already in use')) {
+          errorMsg = 'Email sudah terdaftar. Coba email lain.';
+        } else if (e.toString().contains('invalid-email')) {
+          errorMsg = 'Format email tidak valid.';
+        } else if (e.toString().contains('weak-password')) {
+          errorMsg = 'Password terlalu lemah.';
+        } else if (e.toString().contains('timeout')) {
+          errorMsg = 'Koneksi timeout. Coba lagi.';
+        } else if (e.toString().contains('network')) {
+          errorMsg = 'Masalah koneksi jaringan.';
+        }
+        
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -201,26 +354,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    print('Nama: ${_nameController.text}');
-                    print('Email: ${_emailController.text}');
-                    print('Password: ${_passwordController.text}');
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
+                  onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6B8E5F),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Daftar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Daftar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                 ),
               ),
               const SizedBox(height: 16),

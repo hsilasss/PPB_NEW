@@ -42,7 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 50),
               // Description text
               const Text(
-                'sign up to track ur daily mission\nand get personalized device',
+                'Sign up to track ur daily mission\nand get personalized device.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black,
@@ -73,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   child: const Text(
-                    'sign up',
+                    'Sign Up',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,

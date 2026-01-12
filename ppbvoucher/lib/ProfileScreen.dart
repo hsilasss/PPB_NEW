@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ppbvoucher/EditProfileScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -12,22 +13,24 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveClientMixin {
   @override
+  String? profileImagePath;
   bool get wantKeepAlive => true;
-
   String userName = "Keeny";
 
   @override
   void initState() {
-  super.initState();
-  loadUser();
+    super.initState();
+    loadUser();
   }
 
   Future<void> loadUser() async {
   final pref = await SharedPreferences.getInstance();
   setState(() {
     userName = pref.getString("username") ?? "Keeny";
+    profileImagePath = pref.getString("profileImage");
   });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,22 +49,40 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
               ),
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 80,
                     backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, size: 60, color: Colors.white),
+                    backgroundImage: profileImagePath != null
+                      ? FileImage(File(profileImagePath!))
+                      : null,
+                    child: profileImagePath == null
+                      ? const Icon(Icons.person, size: 60, color: Colors.white)
+                      : null,
                   ),
+
                   const SizedBox(height: 12),
                   Text(userName, style: TextStyle(fontSize: 16)),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () async {
-                      final result = await Navigator.push(context,MaterialPageRoute(builder: (context) =>const EditProfileScreen()),);
-                      loadUser();
-                      if (result != null && result is String){
-                        setState(() {
-                          userName = result;
-                        });
+                      try {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                        );
+                        loadUser();
+                        if (result != null && result is String) {
+                          setState(() {
+                            userName = result;
+                          });
+                        }
+                      } catch (e, st) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Gagal membuka Edit: $e')),
+                        );
+                        // also print to console for debugging
+                        // ignore: avoid_print
+                        print('Navigator.push error: $e\n$st');
                       }
                     },
                     child: const Padding(
@@ -84,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
 
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(color:Color(0xFFF4F1E3)),
+              decoration: const BoxDecoration(color: Colors.white),
               child: Column(
                 children: [
                   const SizedBox(height: 20),
@@ -102,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F1E3),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Column(
@@ -126,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
                     margin: const EdgeInsets.symmetric(horizontal: 40),
                     height: 50,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F1E3),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                     ),
 
@@ -162,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF3BB54A),
+        color: const Color(0xFF6B8E5F),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

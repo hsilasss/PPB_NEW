@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "RewardStorePage.dart";
 import "ProfileScreen.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import 'MissionSubmitScreen.dart';
 
 
 class HomePage extends StatefulWidget  {
@@ -117,7 +118,7 @@ class _HomeContentState extends State<HomeContent> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: Color(0xFF6B8E5F),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -193,6 +194,7 @@ class _HomeContentState extends State<HomeContent> {
             const SizedBox(height: 12),
 
             _missionCard(
+              context: context,
               title: 'Membersihkan Kamar',
               point: '40 Poin',
               image: Icons.bed,
@@ -200,6 +202,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
 
             _missionCard(
+              context: context,
               title: 'Membersihkan Halaman Rumah',
               point: '80 Poin',
               image: Icons.park,
@@ -211,10 +214,9 @@ class _HomeContentState extends State<HomeContent> {
         ),
       );
   }
-  }
 
-      
   Widget _missionCard({
+    required BuildContext context,
     required String title,
     required String point,
     required IconData image,
@@ -238,7 +240,7 @@ class _HomeContentState extends State<HomeContent> {
                 color: Colors.green.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(image, size: 40, color: Colors.green),
+              child: Icon(image, size: 40, color: Color(0xFF6B8E5F)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -266,7 +268,9 @@ class _HomeContentState extends State<HomeContent> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                _handleMissionAction(title, actionText);
+              },
               child: Text(actionText),
             ),
           ],
@@ -274,3 +278,30 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
+
+  void _handleMissionAction(String missionTitle, String actionText) {
+    if (actionText == 'Submit') {
+      // Buka MissionSubmitScreen untuk capture foto dan submit
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MissionSubmitScreen(
+            missionTitle: missionTitle,
+            missionPoint: '40 Poin', // Atau ambil dari parameter
+          ),
+        ),
+      );
+    } else if (actionText == 'Selesai') {
+      // Langsung tandai selesai tanpa foto
+      String message = 'Misi "$missionTitle" telah diselesaikan!';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      print('Mission completed: $missionTitle');
+    }
+  }
+}
